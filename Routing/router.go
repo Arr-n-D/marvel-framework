@@ -1,5 +1,9 @@
 package routing
 
+import (
+	"net/http"
+)
+
 type Router struct {
 	Routes []*Route
 }
@@ -15,43 +19,41 @@ func (r *Router) addRoute(route *Route) {
 // our handler can be either a string or a function
 func (r *Router) Post(path string, handler interface{}) {
 	// check type of handler
-	switch handler.(type) {
-	case string:
-		r.addRoute(&Route{
-			uri:    path,
-			method: "POST",
-			action: handler.(string),
-			Router: r,
-		})
-	// case func
-	case func():
-		r.addRoute(&Route{
-			uri:    path,
-			method: "POST",
-			action: handler.(func()),
-			Router: r,
-		})
-	}
+	r.addRoute(&Route{
+		uri:    path,
+		method: "POST",
+		action: handler,
+		Router: r,
+	})
+
 }
 
 // func get
 func (r *Router) Get(path string, handler interface{}) {
+
+	r.addRoute(&Route{
+		uri:    path,
+		method: "GET",
+		action: handler,
+		Router: r,
+	})
+
+}
+
+func (r *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	// regexp.MustCompile(`\{(\d+)\}`)
+	for _, route := range r.Routes {
+		if route.GetMethod() == request.Method {
+			r.DispatchRoute(route, writer, request)
+		}
+	}
+
+	// http.NotFound(writer, request)
+}
+
+func (r *Router) DispatchRoute(route *Route, writer http.ResponseWriter, request *http.Request) {
 	// check type of handler
-	switch handler.(type) {
-	case string:
-		r.addRoute(&Route{
-			uri:    path,
-			method: "GET",
-			action: handler.(string),
-			Router: r,
-		})
-	// case func
-	case func():
-		r.addRoute(&Route{
-			uri:    path,
-			method: "GET",
-			action: handler.(func()),
-			Router: r,
-		})
+	if handler, ok := route.GetAction().(func(http.ResponseWriter, *http.Request)); ok {
+		handler(writer, request)
 	}
 }

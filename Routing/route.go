@@ -3,7 +3,6 @@ package routing
 const VERBS = "GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS"
 
 // declare a union type for action of type string or func
-
 type Route struct {
 	uri    string
 	method string

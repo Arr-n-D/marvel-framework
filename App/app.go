@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -29,23 +28,14 @@ func Bootstrap() *Application {
 }
 
 func (a *Application) BootstrapRoutes() {
-	a.Router.Get("/", func() {
-		log.Println("Hello World")
+	a.Router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("get organization"))
 	})
 }
 
 // create a new server
 func (a *Application) Run() {
-	log.Println("Listening on port", a.Port)
-	// loop over the router's routes and add them with the http.HandleFunc function
-	for _, route := range a.Router.Routes {
-		// print the route and all its data
-		http.HandleFunc(route.GetUri(), func(w http.ResponseWriter, r *http.Request) {
-
-		})
-	}
-
-	err := http.ListenAndServe(a.Port, nil)
+	err := http.ListenAndServe(a.Port, a.Router)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {
