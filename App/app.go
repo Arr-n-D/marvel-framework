@@ -27,10 +27,16 @@ func Bootstrap() *Application {
 
 }
 
+func w(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("get custom function"))
+}
+
 func (a *Application) BootstrapRoutes() {
 	a.Router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("get organization"))
 	})
+
+	a.Router.Get("/foo", w)
 }
 
 // create a new server
